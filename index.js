@@ -69,7 +69,7 @@ app.post("/register", async (req, res) =>{
 // create POST route for User model (login)
 app.post("/login", async(req, res) =>{
     try {
-        const {email, password} = reqq.body;
+        const {email, password} = req.body;
 
         if(!email || !password)
             return res.status(201).json({success: false, msg: "Missing Data"});
