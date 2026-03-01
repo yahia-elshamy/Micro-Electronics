@@ -19,12 +19,12 @@ async function dbConnection() {
 dbConnection();
 
 // Require Routes
-const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 
 // Endpoints
-app.use("/api", authRoutes);
+app.use("/api", userRoutes);
 app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
 

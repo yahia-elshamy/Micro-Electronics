@@ -21,14 +21,16 @@ const addProductController = async (req, res) => {
 
     // get Token
     const authHeader = req.headers.authorization;
-
     const token = authHeader.split(" ")[1];
+    console.log(token);
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (decodedToken.role !== "admin") {
+    if (decodedToken.role != "admin") {
       return res.status(400).json({ msg: "Only admin can add products" });
     }
+
+    console.log(decodedToken);
 
     const product = await Product.create({
       name,

@@ -6,7 +6,7 @@ const {
   addProductController,
   getProductController,
   getSearchProductController,
-} = require("../controllers/productController");
+} = require("../controllers/productControllers");
 
 router.post("/product", addProductController);
 
