@@ -1,56 +1,71 @@
-const User = require("../models/User");
 const Product = require("../models/Product");
+const User = require("../models/User");
 
-// create POST route for Product model
-const createProduct = async (req, res) => {
-    try {
-        const {userId, name, price, quantity, discripe} = req.body;
-        const user = await User.findById(req.body.userId);
-        if (user.role !== "admin")
-            return res.status(404).json({success: false, msg: "User not authorized to create a product"});
+const jwt = require("jsonwebtoken");
 
-        const product = await Product.create({
-            name,
-            price,
-            quantity,
-            discripe
-        });
+const addProductController = async (req, res) => {
+  try {
+    const { name, price, stock } = req.body;
 
-        return res.status(201).json({success: true, msg: "Product created", data: product})
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+    if (!name || !price || !stock)
+      return res.status(400).json({ msg: "Missing data" });
+
+    // const checkAdmin = await User.findById(userId);
+
+    // if (checkAdmin.role !== "admin")
+    //   return res.status(403).json({ msg: "Only admin can add products" });
+
+    // if (!checkAdmin) {
+    //   return res.status(400).json({ msg: "User not found" });
+    // }
+
+    // get Token
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can add products" });
     }
+
+    const product = await Product.create({
+      name,
+      price,
+      stock,
+    });
+    res.status(201).json({ msg: "Product created", product });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
-
-// create Get route for Product model 
-const getProduct = async (req, res)=>{
-    try {
-        const get_products = await Product.find();
-        return res.status(200).json({success: true, data: get_products});
-    }
-    catch(error){
-        res.status(500).json({success: false, error: error.message});
-    }
+const getProductController = async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
+const getSearchProductController = async (req, res) => {
+  try {
+    const { id } = req.query;
 
-// create Search route for Product model 
-const searchProduct = async (req, res)=>{
-    try {
-        const productName = req.params.name.toLowerCase();
-        const product = await Product.findOne({name: productName});
-        if (!product)
-            return res.status(404).json({success: false, msg: "Product not found"});
+    if (!id) return res.status(400).json({ msg: "Missing ID" });
 
-        return res.status(200).json({success: true, data: product});
-        
-        }
-    catch(error){
-        res.status(500).json({success: false, error: error.message});
-    }
+    const product = await Product.findById(id);
+
+    if (!product) return res.status(404).json({ msg: "Product not found" });
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
 
 module.exports = {
-    createProduct,
-    getProduct,
-    searchProduct
+  addProductController,
+  getProductController,
+  getSearchProductController,
 };

@@ -1,55 +1,65 @@
 const Product = require("../models/Product");
-const User = require("../models/User");
 const Cart = require("../models/Cart");
+const User = require("../models/User");
 
-const addCartController = async (req, res) =>{
-    try {
-        const {userId, productId, quantity} = req.body;
+const addCartController = async (req, res) => {
+  try {
+    // get Data
+    const { userId, productId, quantity } = req.body;
+    // Validated Data
+    if (!userId || !productId || !quantity)
+      return res.status(400).json({ msg: "Missing Data" });
 
-        if(!userId || !productId || !quantity)
-            return res.status(400).json({msg: "Missing Data"});
+    const user = await User.findById(userId);
 
-        const user = await User.findById(userId);
-        if(!user)
-            return res.status(404).json({msg: "User not found"});
+    if (!user) return res.status(404).json({ msg: "User Not Found" });
 
-        const product = await Product.findById(productId);
-        if(!product)
-            return res.status(404).json({msg: "Product not found"});
+    const product = await Product.findById(productId);
 
-        if (quantity > product.quantity)
-            return res.json({msg: "Quantity large stock"});
+    if (!product) return res.status(404).json({ msg: "Product Not Found" });
 
-        let cart = await Cart.find({user: userId});
+    if (quantity > product.stock)
+      return res.json({ msg: "quantity Large Stock " });
 
-        if (!cart) 
-            cart = await Cart.Create({user, item: [], })
+    let cart = await Cart.findOne({ user: userId });
+
+    if (!cart) cart = await Cart.create({ user, items: [] });
+
+    // Add Product Or Updated quantity
+    const itemsIndex = cart.items.findIndex((item) => {
+      item.product.equals(productId);
+    });
+
+    if (itemsIndex > -1) {
+      cart.items[itemsIndex].quantity += quantity;
+    } else {
+      cart.items.push({ product: productId, quantity });
     }
-    catch(error) {
 
-    }
-}
+    await cart.save();
+    product.stock -= quantity;
+    await product.save();
 
-const getCartController = async (req, res) =>{
-    try {
+    res.status(201).json({
+      msg: "Done Add Product In Cart",
+      data: cart,
+    });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
+};
 
-    }
-    catch(error) {
-
-    }
-}
-// remove item
-const removeItemCartController = async (req, res) =>{
-    try {
-
-    }
-    catch(error) {
-
-    }
-}
+const getCartController = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+const removeItemCartController = async (req, res) => {
+  try {
+  } catch (error) {}
+};
 
 module.exports = {
-    addCartController,
-    getCartController,
-    removeItemCartController
-}
+  addCartController,
+  getCartController,
+  removeItemCartController,
+};

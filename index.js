@@ -1,46 +1,34 @@
-// require dotenv -------------------------------------------------------
 require("dotenv").config();
-
-// require express and use it -------------------------------------------
 const express = require("express");
-const app = express();
-
-// require mongoose -----------------------------------------------------
 const mongoose = require("mongoose");
 
-// initialize port, and mongoURL ----------------------------------------
-const port = process.env.PORT || 5000;
-const mongoURL = process.env.MONGO_URL;
-
-// use middleware -------------------------------------------------------
+const app = express();
 app.use(express.json());
 
-// import models
-const { hash } = require("bcrypt");
+const port = process.env.PORT || 3000;
+const mongoUrl = process.env.MONGO_URL;
 
-// create connection function to the DataBase ---------------------------
-const dbConnection = async () => {
-    try {
-        await mongoose.connect(mongoURL);
-        console.log("Successfully connected");
-    }
-    catch(error) {
-        console.log("Failed to connect due to error: ", error);
-    }
+async function dbConnection() {
+  try {
+    await mongoose.connect(mongoUrl);
+    console.log("MongoDB Connected!");
+  } catch (error) {
+    console.log(error);
+  }
 }
-
 dbConnection();
 
-// require routes
-const userRoutes = require("./routes/userRoutes");
+// Require Routes
+const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
-app.use("/api", userRoutes);
+// Endpoints
+app.use("/api", authRoutes);
 app.use("/api", productRoutes);
+app.use("/api", cartRoutes);
 
-
-
-// listen to the port ---------------------------------------------------
-app.listen(port, ()=>{
-    console.log(`Server is running on port: ${port}`);
+// Run Server
+app.listen(port, () => {
+  console.log(`Server running at port ${port}`);
 });

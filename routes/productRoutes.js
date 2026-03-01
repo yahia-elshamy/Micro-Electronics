@@ -2,15 +2,15 @@ const express = require("express");
 
 const router = express.Router();
 
-const {createProduct, getProduct, searchProduct} = require("../controllers/productControllers");
+const {
+  addProductController,
+  getProductController,
+  getSearchProductController,
+} = require("../controllers/productController");
 
-// create POST route for Product model
-router.post("/products", createProduct);
+router.post("/product", addProductController);
 
-// create Get route for Product model 
-router.get("/products", getProduct);
-
-// create Search route for Product model 
-router.get("/products/:name", searchProduct);
+router.get("/products", getProductController);
+router.get("/products/search", getSearchProductController);
 
 module.exports = router;
